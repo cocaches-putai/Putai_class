@@ -54,6 +54,13 @@ h1,h2,h3{font-family:var(--font-display);font-weight:700;margin:0;}
 header.page-head{margin-bottom:18px;}
 header.page-head h1{font-size:24px;color:var(--accent-strong);margin-top:4px;}
 header.page-head p{color:var(--text-2);margin:8px 0 0;font-size:13px;max-width:70ch;}
+.nav-link-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.nav-link-btn{
+  display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);background:var(--surface);
+  color:var(--accent-strong);border-radius:999px;padding:7px 14px;font-weight:700;font-size:12.5px;
+  font-family:var(--font-body);text-decoration:none;box-shadow:var(--shadow);
+}
+.nav-link-btn:hover{background:var(--accent-bg);}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:18px;}
 .stack{display:flex;flex-direction:column;gap:14px;}
 .mode-row{display:flex;gap:8px;margin-bottom:14px;}
@@ -129,6 +136,7 @@ table.sched td.cell-blocked{color:var(--warn);background:var(--warn-bg);font-wei
   var META = JSON.parse(document.getElementById('meta-data').textContent);
   var CLASS_GRIDS = JSON.parse(document.getElementById('class-grids-data').textContent);
   var TEACHER_BLOCKS = JSON.parse(document.getElementById('teacher-blocks-data').textContent);
+  var PATROL_LOG_URL = 'https://claude.ai/artifact/6b7ntgNmn96GeC4ftt9Vef';
 
   var NONJK_DAYS = ['一','二','三','四','五','六','日'];
   var JK_DAYS = ['一','二','三','四','五'];
@@ -416,6 +424,9 @@ table.sched td.cell-blocked{color:var(--warn);background:var(--warn-bg);font-wei
         '<div class="eyebrow">普台高級中學　115 學年度第一學期</div>'+
         '<h1>課表查詢系統</h1>'+
         '<p>資料版本：'+esc(META.scheduleVersion||'')+'（'+esc(META.updatedAt||'')+' 更新）　'+esc(META.implementDateRange||'')+'</p>'+
+        '<div class="nav-link-row">'+
+          '<a class="nav-link-btn" href="'+PATROL_LOG_URL+'" target="_blank" rel="noopener">巡堂紀錄 →</a>'+
+        '</div>'+
       '</header>'+
       '<div class="card stack">'+
         renderModeSwitch()+
