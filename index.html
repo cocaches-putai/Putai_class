@@ -108,9 +108,11 @@ table.sched td.cell-empty{color:var(--text-2);opacity:.45;}
 table.sched td.cell-blocked{color:var(--warn);background:var(--warn-bg);font-weight:600;font-size:12.5px;}
 .cell-main{font-weight:700;font-size:13px;}
 .cell-sub{color:var(--text-2);font-size:11.5px;margin-top:1px;}
+.cell-card{background:var(--accent-bg);border-left:3px solid var(--accent-strong);border-radius:8px;padding:6px 8px;text-align:left;}
+.cell-card.multi-entry{margin-top:4px;}
+table.sched td.cell-meta{color:var(--text-2);font-size:12px;}
 .cell-link{background:none;border:none;padding:0;color:var(--accent-strong);font-weight:700;font-size:13px;cursor:pointer;text-decoration:underline;font-family:var(--font-body);}
 .cell-link:hover{color:var(--accent);}
-.multi-entry{border-top:1px dashed var(--border);margin-top:3px;padding-top:3px;}
 .empty-state{color:var(--text-2);font-size:13.5px;padding:30px 4px;text-align:center;}
 .footnote{margin-top:26px;font-size:12px;color:var(--text-2);line-height:1.7;border-top:1px solid var(--border);padding-top:14px;}
 .footnote code{background:var(--surface-2);padding:1px 5px;border-radius:4px;}
@@ -284,24 +286,24 @@ table.sched td.cell-blocked{color:var(--warn);background:var(--warn-bg);font-wei
   }
 
   function cellHtmlForClassView(entries){
-    if(!entries || entries.length===0) return '<td class="cell-slot cell-empty">—</td>';
+    if(!entries || entries.length===0) return '<td class="cell-slot cell-empty"></td>';
     var parts = entries.map(function(e, idx){
-      var cls = idx>0 ? ' multi-entry' : '';
+      var cls = 'cell-card' + (idx>0 ? ' multi-entry' : '');
       if(e.teacher){
         var linkable = !!findTeacher(e.teacher);
         var nameHtml = linkable
           ? '<button type="button" class="cell-link" data-action="goto-teacher" data-name="'+esc(e.teacher)+'">'+esc(e.teacher)+'</button>'
           : '<span class="cell-main">'+esc(e.teacher)+'</span>';
         var subText = esc(e.subject||'') + (e.role ? '（'+esc(e.role)+'）' : '');
-        return '<div class="'+cls.trim()+'"><div class="cell-main">'+nameHtml+'</div><div class="cell-sub">'+subText+'</div></div>';
+        return '<div class="'+cls+'"><div class="cell-main">'+nameHtml+'</div><div class="cell-sub">'+subText+'</div></div>';
       }
       // 查無法安全對應到單一老師（例如真正跨班分組、或名單上是法師／兼職老師等非資料庫內的人）：
       // 只誠實顯示科目文字，不要硬配一個老師名字。有 note（例如「分組上課」）時維持跟一般節次
       // 同樣的「上面是授課老師（這裡用 note 代替）、下面是課程名稱」排列順序，排版才會一致。
       if(e.note){
-        return '<div class="'+cls.trim()+'"><div class="cell-main">'+esc(e.note)+'</div><div class="cell-sub">'+esc(e.subject||'')+'</div></div>';
+        return '<div class="'+cls+'"><div class="cell-main">'+esc(e.note)+'</div><div class="cell-sub">'+esc(e.subject||'')+'</div></div>';
       }
-      return '<div class="'+cls.trim()+'"><div class="cell-main">'+esc(e.subject||'')+'</div></div>';
+      return '<div class="'+cls+'"><div class="cell-main">'+esc(e.subject||'')+'</div></div>';
     }).join('');
     return '<td class="cell-slot">'+parts+'</td>';
   }
@@ -332,14 +334,20 @@ table.sched td.cell-blocked{color:var(--warn);background:var(--warn-bg);font-wei
       if(teacherName && isBlocked(teacherName, weekType, day, period)){
         return '<td class="cell-slot cell-blocked">排休</td>';
       }
-      return '<td class="cell-slot cell-empty">空堂</td>';
+      return '<td class="cell-slot cell-empty"></td>';
     }
     var cls = cell.class, subj = cell.subject||'';
+    if(!subj){
+      // 小表查無科目的格子：大多是行政／會議／年段會議等標籤（而且原始 Excel 常把一個標籤拆成
+      // 一節一個字，例如「領域時間」拆成 4 節各顯示一個字），不是真正的班級課程。這裡刻意不套用
+      // 跟真正班級一樣的卡片外框，純文字淡化顯示，避免被誤會成一堂真正排定的課。
+      return '<td class="cell-slot cell-meta">'+esc(cls)+'</td>';
+    }
     var linkable = isRealClass(cls, subj) && CLASSES.some(function(c){ return c.name===cls; });
     var clsHtml = linkable
       ? '<button type="button" class="cell-link" data-action="goto-class" data-name="'+esc(cls)+'">'+esc(cls)+'</button>'
       : '<span class="cell-main">'+esc(cls)+'</span>';
-    return '<td class="cell-slot"><div class="cell-main">'+clsHtml+'</div><div class="cell-sub">'+esc(subj)+'</div></td>';
+    return '<td class="cell-slot"><div class="cell-card"><div class="cell-main">'+clsHtml+'</div><div class="cell-sub">'+esc(subj)+'</div></div></td>';
   }
 
   function renderWeekTable(weekType, days, rowRenderer){
